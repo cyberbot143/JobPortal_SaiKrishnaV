@@ -13,12 +13,13 @@ mongoose.Promise = global.Promise;
 mongoose.connect("mongodb://localhost:27017/blogpost");
 
 var UserSchema = mongoose.Schema({         //creating a post schema
-   username :{type:String,required:true},
-   email:{type:String,required:true},
-   location:{type:String,required:true},
-   phone:{type:String,required:true},
-   password:{type:String,required:true},
-   userType:{type:String,required:true},
+   _id: {type:String},
+   username:{type:String},
+   email:{type:String},
+   location:{type:String},
+   phone:{type:String},
+   password:{type:String},
+   userType:{type:String},
    regOn:{type:Date,default:Date.now}
 });
 
@@ -41,15 +42,16 @@ res.sendFile(__dirname+'/index.html');
 });
 
 //register a user
-app.post('/regdata',function(req,res){
-    console.log(req.body);
-    var user = req.body;
-    UserModel.create(user).then(
-            function(userObj){
-                res.json(200);     
-            },function (error){
-                res.sendStatus(400);
-            });      
+app.post('/register',function(req,res){
+    var retuser = req.body; 
+var user = new UserModel({_id:retuser.username});
+user.save(function (err) {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log('Successfully inserted');
+  }
+});    
 });
 
 //start our app

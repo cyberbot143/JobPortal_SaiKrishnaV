@@ -21,7 +21,8 @@ app.controller('regCntrl', ['$scope','$location','$http', function ($scope, $loc
 
     $scope.CreateAccount = function (user) {
         user.userType = $scope.userType;
-        $http.post('http://localhost:3000/regdata',user);
+        
+        $http.post('http://localhost:3000/register',user);
 
     }
 }]);
