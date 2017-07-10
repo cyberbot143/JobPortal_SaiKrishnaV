@@ -1,0 +1,12 @@
+<form class="container" style="max-width:400px" method="post" action="/regdata" ng-controller="regCntrl">
+    <h2>  Register form</h2>
+    <input type="text" ng-model="user.userName" class="form-control" placeholder="user name" required /><br />
+    <input type="password" ng-model="user.password" class="form-control" placeholder="password" required /><br />
+    <input type="text" ng-model="user.email" class="form-control" placeholder="email" required /><br />
+    <input type="text" ng-model="user.phone" class="form-control" placeholder="phoneNumber" required /><br />
+    <input type="text" ng-model="user.location" class="form-control" placeholder="location" required /><br />
+     UserType : 
+    <input type="radio" ng-model="userType" value="JobSeeker"> JobSeeker
+    <input type="radio" ng-model="userType" value="Employer"> Employer <br /> <br/>
+    <button ng-click="CreateAccount(user)" class="btn btn-primary"> Register </button> 
+</form>
