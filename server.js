@@ -10,48 +10,108 @@ var mongoose  = require('mongoose');
 var bodyParser = require('body-parser');
 var http = require('http');
 mongoose.Promise = global.Promise;
-mongoose.connect("mongodb://localhost:27017/blogpost");
+mongoose.connect("mongodb://localhost:27017/blogpost"); //connection to mongodb
+var UserModel = require('./models/UserSchema');
+var JobModel = require('./models/JobSchema')
 
-var UserSchema = mongoose.Schema({         //creating a post schema
-   _id: {type:String},
-   username:{type:String},
-   email:{type:String},
-   location:{type:String},
-   phone:{type:String},
-   password:{type:String},
-   userType:{type:String},
-   regOn:{type:Date,default:Date.now}
-});
-
-var JobSchema = mongoose.Schema({           //create a job schema
-    jobTitle:{type:String,required:true},
-    jobDesc:{type:String,required:true},
-    jobLoc:{type:String,required:true},
-    jobKeywords:{type:String,require:true}
-});
-
-var UserModel = mongoose.model("UserModel",UserSchema);
-var JobModel = mongoose.model("JobModel",JobSchema);
-
-app.use(express.static('public')); //static page content
+app.use(express.static(__dirname+'/public')); //static page content
 app.use(bodyParser.urlencoded({'extended':false}));
 app.use(bodyParser.json());
+var router = express.Router();
+ 
+// serve angular front end files from root path
+router.use('/', express.static('public', { redirect: false }));
+ 
+// rewrite virtual urls to angular app to enable refreshing of internal pages
 
-app.get('/',function(req,res){
-res.sendFile(__dirname+'/index.html');
+//register a user and assign _id as username
+app.post('/reg',function(req,res){
+var retuser = req.body; 
+var user = new UserModel({_id:retuser.username, username:retuser.username,
+   email:req.body.email,
+   location:retuser.location,
+   phone:retuser.phone,
+   password:retuser.password,
+   userType:retuser.userType
+});
+user.save(function (err) {
+  if (err) {
+    console.log(err);
+    res.status(500).send({"message":"Error with server"} )
+  }
+  if(!user){
+        console.log('user already exists');
+        res.status(201).send({"message":"User already exists"});
+  } 
+  else {
+      res.status(200).send({"message":"Succesfully Registered"});
+    console.log('Successfully inserted');
+  }
+});  
 });
 
-//register a user
-app.post('/register',function(req,res){
-    var retuser = req.body; 
-var user = new UserModel({_id:retuser.username});
+app.post('/log',function(req,res){
+
+var user = req.body;
+
+UserModel.findOne({ username: req.body.username,password:req.body.password}, function(err, user) {
+ 
+  if(err){
+    res.status(500).send({msg:"error"});
+  }
+  if(user){
+    console.log(user);
+    res.status(200).send({userData:user });
+  }
+  else{
+    res.status(404).send({msg:"User error"});
+  }
+})
+  
+});
+app.post("/postJob",
+function(req,res){
+var job = req.body;
+var user = new JobModel({
+  jobTitle:job.title,
+  jobDesc:job.desc,
+  jobLoc:job.location,
+  jobKeywords:job.keywords
+});
 user.save(function (err) {
   if (err) {
     console.log(err);
   } else {
-    console.log('Successfully inserted');
+    console.log('Successfully posted a job');
+    res.send(200);
   }
-});    
+});  
+});
+    
+app.post('/searchkey',function(req,res){
+
+  var key = req.body.key;
+
+  JobModel.find({$or : [ { "jobTitle": key }, { "jobDesc": key },{"jobLoc":key},{jobKeywords: {$regex: key}}]}, function(err, jobs) {
+  
+    if(err){
+    res.status(500).send({msg:"error"});
+  }
+  if(jobs){
+    console.log(jobs);
+    res.status(200).send({jobs:jobs });
+  }
+  else{
+    res.status(404).send({msg:"User error"});
+  } 
+ }).collation({ locale: 'en', strength: 2});
+});
+
+router.get('*', function (req, res, next) {
+    res.sendFile(path.resolve('public/index.html'));
+});   
+app.get('/*',function(req,res){
+res.sendFile(__dirname+'/index.html');
 });
 
 //start our app
