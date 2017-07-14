@@ -1,4 +1,4 @@
-var app = angular.module('myApp', ['ngRoute', 'ngCookies']);
+var app = angular.module('myApp', ['ngRoute', 'ngCookies','appDirective']);
 
 app.config(function ($routeProvider, $locationProvider) {
 
@@ -14,17 +14,20 @@ app.config(function ($routeProvider, $locationProvider) {
         resolve: {
             loggedIn: onlyLoggedIn
         }
+
     }).when('/searchJobs', {
         templateUrl: 'views/searchjobs.html',
         controller: 'homeCntrl',
         resolve: {
-            loggedIn: onlyLoggedIn
+            loggedIn: onlyLoggedIn,
+            isAuthorized:onlyJobSeeker
         }
     }).when('/postajob', {
         templateUrl: 'views/postajob.html',
         controller: 'homeCntrl',
         resolve: {
-            loggedIn: onlyLoggedIn
+            loggedIn: onlyLoggedIn,
+            isAuthorized:onlyEmployer
         }
     }).otherwise({
         redirectTo: '/'
@@ -68,6 +71,30 @@ var onlyLoggedIn = function ($location, $q, myservice) {
     }
     return deferred.promise;
 };
+var onlyJobSeeker = function($location, $q, myservice){
+
+   var deferred = $q.defer();
+    if (myservice.getNav() == "JobSeeker") {
+        deferred.resolve();
+    } else {     
+        deferred.reject();
+        $location.path('/postajob');
+    }
+    return deferred.promise;
+
+}
+var onlyEmployer = function($location, $q, myservice){
+
+   var deferred = $q.defer();
+    if (myservice.getNav() == "Employer") {
+        deferred.resolve();
+    } else {     
+        deferred.reject();
+        $location.path('/searchJobs');
+    }
+    return deferred.promise;
+
+}
 app.controller('regCntrl', ['$scope', '$location', '$http', function ($scope, $location, $http) {
 
     $scope.CreateAccount = function (user) {
@@ -86,7 +113,6 @@ app.controller('loginCntrl', ['$scope', '$location', '$http', '$cookies', 'myser
         $http.post('/log', user).then(function (data) {
                 myservice.set(data.data.userData.username);
                 myservice.setNav(data.data.userData.userType);
-
                 $location.path('/homepage');
             },
             function (err) {
@@ -122,25 +148,17 @@ app.controller('homeCntrl', ['$scope', '$location', '$http', '$cookies', 'myserv
             console.log('No jobs found');
         })
     }
+       $scope.editUser = function (postId){
+     $http
+             .get("/api/blogpost/"+postId)
+             .success(function(post){
+                 $scope.post = post;
+                console.log(post);
+             });
+       
+   };
+   $scope.updatePost = function(post){
+     $http
+             .put("/api/blogpost/"+post._id,post).success(getAllPosts);       
+   };
 }]);
-
-app.directive('myNav', function () {
-    return {
-        restrict: 'EA',
-        scope: {
-            datasource: '=',
-            add: '&',
-        },
-        controller: function ($scope,$location,myservice) {
-
-            $scope.userType = sessionStorage.userType;
-            $scope.logout = function () {
-                $location.path('/');
-                myservice.set("loggedOut");
-                sessionStorage.userType = "";
-            }
-
-        },
-        templateUrl: 'views/navbar.html'
-    };
-});

@@ -1,8 +1,17 @@
 <my-nav></my-nav>
-<div class="jumbotron"> 
-    
+<div class="jumbotron">
 
-            <div class="container" ng-controller="loginCntrl">
-                <h2>Welcome {{username}}</h2>
-            </div>
+
+    <div class="container" ng-controller="loginCntrl">
+        <h2>Welcome {{username}}<span>  </span> <button ng-click="editUser(User_id)"><span class = "glyphicon glyphicon-edit" data-toggle="collapse" data-target="#update" ng-click="showform = true"></span></button></h2>
+        <form class="container" style="max-width:400px" id="update" ng-controller="homeCntrl" ng-If="showform">
+            <h2> Update</h2>
+            <input type="text" ng-model="user.username" class="form-control" placeholder="user name"  /><br />
+            <input type="password" ng-model="user.password" class="form-control" placeholder="password" /><br />
+            <input type="text" ng-model="user.email" class="form-control" placeholder="email" /><br />
+            <input type="text" ng-model="user.phone" class="form-control" placeholder="phoneNumber" /><br />
+            <input type="text" ng-model="user.location" class="form-control" placeholder="location" /><br />
+            <button ng-click="updateAccount(userId)" class="btn btn-primary"> Update </button>
+        </form>
+    </div>
 </div>
