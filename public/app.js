@@ -128,7 +128,6 @@ app.controller('homeCntrl', ['$scope', '$location', '$http', '$cookies', 'myserv
 
     $scope.username = myservice.get();
     sessionStorage.userType = myservice.getNav();
-    console.log(sessionStorage.userType);
     $scope.PostJob = function (job) {
 
         $http.post('/postJob', job).then(function (res) {
@@ -139,6 +138,17 @@ app.controller('homeCntrl', ['$scope', '$location', '$http', '$cookies', 'myserv
 
         document.getElementById('jobform').reset();
     }
+     $scope.updateAccount = function(user){
+      $http.post("/updateProfile", {"user":user,"username":$scope.username})
+   .then(
+       function(response){
+         alert(" Succesfully Updated ")
+       }, 
+       function(response){
+         alert(" un-sucessfully updated ");
+       }
+    );
+};
     $scope.search = function () {
         $http.post('/searchkey', {
             key: $scope.key
@@ -148,17 +158,6 @@ app.controller('homeCntrl', ['$scope', '$location', '$http', '$cookies', 'myserv
             console.log('No jobs found');
         })
     }
-       $scope.editUser = function (postId){
-     $http
-             .get("/api/blogpost/"+postId)
-             .success(function(post){
-                 $scope.post = post;
-                console.log(post);
-             });
-       
-   };
-   $scope.updatePost = function(post){
-     $http
-             .put("/api/blogpost/"+post._id,post).success(getAllPosts);       
-   };
+
+  
 }]);

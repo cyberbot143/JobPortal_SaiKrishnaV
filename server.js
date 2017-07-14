@@ -82,8 +82,24 @@ app.post('/log', function (req, res) {
       });
     }
   })
-
 });
+app.post('/updateProfile', function(req, res) {
+  var user = req.body;
+   const doc = {
+    email: user.user.email,
+    location: user.user.location,
+    phone:user.user.phone,
+    password: user.user.password,
+    updatedAt: Date.now(),
+  };
+  UserModel.update({_id:req.body.username}, doc, function(err, raw) {
+    if (err) {
+      res.send(err);
+    }
+    res.status(200).send({"msg":"successful registration"});
+  })
+});
+
 app.post("/postJob",
   function (req, res) {
     var job = req.body;
