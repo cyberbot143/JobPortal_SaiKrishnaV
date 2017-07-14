@@ -1,6 +1,5 @@
 var app = angular.module('myApp', ['ngRoute', 'ngCookies']);
 
-
 app.config(function ($routeProvider, $locationProvider) {
 
     $routeProvider.when('/', {
@@ -11,18 +10,29 @@ app.config(function ($routeProvider, $locationProvider) {
         controller: 'regCntrl'
     }).when('/homepage', {
         templateUrl: 'views/homepage.html',
-        controller: 'homeCntrl'
+        controller: 'homeCntrl',
+        resolve: {
+            loggedIn: onlyLoggedIn
+        }
     }).when('/searchJobs', {
         templateUrl: 'views/searchjobs.html',
-        controller: 'homeCntrl'
+        controller: 'homeCntrl',
+        resolve: {
+            loggedIn: onlyLoggedIn
+        }
     }).when('/postajob', {
         templateUrl: 'views/postajob.html',
-        controller: 'homeCntrl'
+        controller: 'homeCntrl',
+        resolve: {
+            loggedIn: onlyLoggedIn
+        }
     }).otherwise({
         redirectTo: '/'
     });
     $locationProvider.html5Mode(true);
 });
+
+
 app.factory('myservice', function ($cookies) {
     var mydata = [];
 
@@ -30,15 +40,34 @@ app.factory('myservice', function ($cookies) {
         $cookies.putObject("myData", data);
     }
 
+    function setNav(navData) {
+        $cookies.putObject("navData", navData);
+    }
+
     function get() {
         return $cookies.getObject("myData");
     }
 
+    function getNav() {
+        return $cookies.getObject("navData");
+    }
     return {
         set: set,
-        get: get
+        setNav: setNav,
+        get: get,
+        getNav: getNav
     }
 });
+var onlyLoggedIn = function ($location, $q, myservice) {
+    var deferred = $q.defer();
+    if (myservice.get() == "loggedOut") {
+        deferred.reject();
+        $location.url('/login');
+    } else {
+        deferred.resolve();
+    }
+    return deferred.promise;
+};
 app.controller('regCntrl', ['$scope', '$location', '$http', function ($scope, $location, $http) {
 
     $scope.CreateAccount = function (user) {
@@ -56,6 +85,8 @@ app.controller('loginCntrl', ['$scope', '$location', '$http', '$cookies', 'myser
     $scope.login = function (user) {
         $http.post('/log', user).then(function (data) {
                 myservice.set(data.data.userData.username);
+                myservice.setNav(data.data.userData.userType);
+
                 $location.path('/homepage');
             },
             function (err) {
@@ -70,6 +101,8 @@ app.controller('homeCntrl', ['$scope', '$location', '$http', '$cookies', 'myserv
 
 
     $scope.username = myservice.get();
+    sessionStorage.userType = myservice.getNav();
+    console.log(sessionStorage.userType);
     $scope.PostJob = function (job) {
 
         $http.post('/postJob', job).then(function (res) {
@@ -80,17 +113,34 @@ app.controller('homeCntrl', ['$scope', '$location', '$http', '$cookies', 'myserv
 
         document.getElementById('jobform').reset();
     }
-$scope.search = function(){
-   $http.post('/searchkey',{key:$scope.key}).then(function(data){ 
-   $scope.jobs = data.data.jobs;  
-   },function(err){
-    console.log('No jobs found');
-   })
-
-}
-    $scope.logout = function () {
-        $location.path('/');
+    $scope.search = function () {
+        $http.post('/searchkey', {
+            key: $scope.key
+        }).then(function (data) {
+            $scope.jobs = data.data.jobs;
+        }, function (err) {
+            console.log('No jobs found');
+        })
     }
-
-
 }]);
+
+app.directive('myNav', function () {
+    return {
+        restrict: 'EA',
+        scope: {
+            datasource: '=',
+            add: '&',
+        },
+        controller: function ($scope,$location,myservice) {
+
+            $scope.userType = sessionStorage.userType;
+            $scope.logout = function () {
+                $location.path('/');
+                myservice.set("loggedOut");
+                sessionStorage.userType = "";
+            }
+
+        },
+        templateUrl: 'views/navbar.html'
+    };
+});

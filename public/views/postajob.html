@@ -1,34 +1,8 @@
-
-<nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
-                aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-            <a class="navbar-brand" href="/homepage">JobPortal</a>
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/homepage"> Home</a></li>
-                <li class="active"><a href="/postajob">Post Jobs</a></li>
-                <li><a href="/searchJobs">Search Jobs</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li><a ng-click="logout()">Logout</a></li>
-            </ul>
-        </div>
-
-        <!--/.nav-collapse -->
-    </div>
-</nav>
+<my-nav></my-nav>
 <div class="jumbotron">
     
 <form class="container" style="max-width:400px" id ="jobform" name="jobform" ng-controller="homeCntrl">
-    <h2>  Register form</h2>
+    <h2> Post a Job</h2>
     <input type="text" ng-model="job.title" class="form-control" placeholder="Job Title" required /><br />
     <input type="text" ng-model="job.desc" class="form-control" placeholder="Job Description" required /><br />
     <input type="text" ng-model="job.keywords" class="form-control" placeholder="Keywords for search-Criteria" required /><br />
