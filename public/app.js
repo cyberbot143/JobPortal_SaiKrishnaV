@@ -23,13 +23,13 @@ app.config(function ($routeProvider, $locationProvider) {
             isAuthorized:onlyJobSeeker
         }
     }).when('/postajob', {
-        templateUrl: 'views/postajob.html',
+        templateUrl: 'views/postajob.html',     
         controller: 'homeCntrl',
         resolve: {
             loggedIn: onlyLoggedIn,
             isAuthorized:onlyEmployer
         }
-    }).otherwise({
+    }).otherwise({                     //any invalid access in browser throws you back to '/' of route configuration
         redirectTo: '/'
     });
     $locationProvider.html5Mode(true);
